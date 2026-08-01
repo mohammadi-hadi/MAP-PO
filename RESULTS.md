@@ -1,4 +1,4 @@
-# BehAv-PO — Complete Experimental Results
+# MAP-PO — Complete Experimental Results
 
 *Generated from `artifacts/` by `src/evaluation/generate_results_md.py` on 2026-07-19 (commit `21d55d8`). Do not edit by hand — regenerate instead. All scores are ×100; F1 is macro (mean of F1-YES and F1-NO) unless stated otherwise.*
 

@@ -1,4 +1,4 @@
-# BehAv-PO: Full Pipeline Guide
+# MAP-PO: Full Pipeline Guide
 
 Complete step-by-step guide for running the multi-agent behavioral preference
 optimization pipeline for sexism detection on EXIST 2024, in four settings:
@@ -36,6 +36,9 @@ data/raw/EXIST2024_training.json
         |
         v
 [6. Evaluation]             ->  artifacts/results/*.json + artifacts/predictions/*.json
+        |
+        v
+[7. Paper]                  ->  paper/main.pdf  +  paper/map_po_overleaf.zip
 ```
 
 ## Prerequisites
@@ -72,6 +75,10 @@ label entropy), separately per language.
 
 ```bash
 python src/preprocessing/behavioral_clustering.py --lang en
+
+# Cluster-count diagnostics behind the k=3 choice (silhouette, YES-rate MAD,
+# minimum cluster share, pairwise YES-rate gaps) -> artifacts/clustering/{lang}/k_selection.json
+.venv-mlx/bin/python src/preprocessing/k_selection.py --lang es
 python src/preprocessing/behavioral_clustering.py --lang es   # forces k=3 (see below)
 python src/preprocessing/clustering_ablation.py --lang en     # 2-feature ablation (report-only)
 python src/preprocessing/clustering_ablation.py --lang es
@@ -229,6 +236,21 @@ python src/evaluation/evaluate_agents.py --baselines     # Always-NO / zero-shot
 python src/evaluation/evaluate_agents.py --all           # everything
 ```
 
+Same-base baselines on gpt-4.1-mini (used by the paper's GPT-EN/GPT-ES tables;
+`base_41mini_model_ids.json` maps all three clusters to the plain base model):
+
+```bash
+.venv-mlx/bin/python src/evaluation/openai_predict.py \
+    --model-ids artifacts/model_ids/base_41mini_model_ids.json \
+    --lang en --label base_41mini --stage base            # EN zero-shot ensemble
+.venv-mlx/bin/python src/evaluation/openai_predict.py \
+    --model-ids artifacts/model_ids/base_41mini_model_ids.json \
+    --lang en --label persona_41mini --stage persona --persona   # EN persona prompts
+.venv-mlx/bin/python src/evaluation/openai_predict.py \
+    --model-ids artifacts/model_ids/base_41mini_model_ids.json \
+    --lang es --label gpt41mini_base_es --stage base      # ES zero-shot ensemble
+```
+
 **Outputs:** `artifacts/results/<method>_results.json`,
 `artifacts/predictions/<method>_predictions.json`
 
@@ -256,6 +278,14 @@ Writes `artifacts/results/confidence_intervals.json` and
 python src/evaluation/generate_plots.py
 ```
 Writes `paper/figures/{mva_comparison,caa_comparison,yes_rates,disagreement,alpha_sweep,beta_sweep}.pdf`.
+
+### Results document
+
+```bash
+python3 src/evaluation/generate_results_md.py
+```
+Regenerates `RESULTS.md` (every experiment in one document) from
+`artifacts/`; run after any new result lands so the document never drifts.
 
 ## Step 7: Optional — Deliberation
 
@@ -290,17 +320,27 @@ Scans OpenAI for completed jobs, saves missing `*_model_ids.json`, runs
 `evaluate_agents.py` on anything without a results file, submits the next
 batch if slots are free.
 
-## Step 9: Verification
+## Step 9: Paper + Overleaf zip
 
-Run after any pipeline stage to catch regressions:
+```bash
+cd paper
+bash make_overleaf_zip.sh
+```
+
+Writes `paper/map_po_overleaf.zip` containing `main.tex`, `references.bib`,
+`acl.sty`, `acl_natbib.bst`, `figures/`, `main.pdf`, `main.bbl`.
+
+## Step 10: Pre-Commit Verification
+
+**Required before every commit** (enforced by CLAUDE.md):
 
 ```bash
 python src/pipeline/verify_pipeline.py
 ```
 
-Checks clustering outputs, data shapes, splits, and result JSONs for all
-four settings. Data checks are skipped with a warning until `data/` has been
-regenerated from the EXIST source (see README).
+Checks clustering, SFT/DPO data shapes, train/test splits, every
+`*_model_ids.json`, well-formed result JSONs, paper compiles, no API keys in
+history, `.gitignore` hygiene, git identity, commit-message hygiene.
 
 ## Naming Conventions
 

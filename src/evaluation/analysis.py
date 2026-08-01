@@ -208,7 +208,7 @@ def main():
         }
         print(f"  {method:25s} MVA={mean:.3f} [{lo:.3f}, {hi:.3f}]")
 
-    # Significance test: is BehAv-PO significantly better than baselines?
+    # Significance test: is MAP-PO significantly better than baselines?
     print("\n" + "=" * 60)
     print("Pairwise Significance (95% CI overlap)")
     print("=" * 60)

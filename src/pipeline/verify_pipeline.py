@@ -2,12 +2,8 @@
 """
 Pipeline Integrity Checker
 ===========================
-Verifies the BehAv-PO pipeline is in a consistent state. Run after any
-pipeline stage to catch regressions.
-
-Data checks are skipped with a warning until data/ has been regenerated
-from the EXIST 2024 source (see README); the shipped result files under
-artifacts/results/ are always checked.
+Verifies the entire MAP-PO pipeline is in a consistent state.
+Run before every commit/push to catch regressions.
 
 Exit codes:
   0 = all checks passed
@@ -16,6 +12,7 @@ Exit codes:
 
 import json
 import os
+import subprocess
 import sys
 
 # Make `import config` and `from models.agent ...` work from repo root
@@ -32,29 +29,46 @@ def check(name, condition, detail=""):
     return condition
 
 
-def warn(name, detail=""):
-    print(f"  {WARN} {name}" + (f" - {detail}" if detail else ""))
+def warn(name, detail):
+    print(f"  {WARN} {name} - {detail}")
 
 
 def main():
     print("=" * 60)
-    print("BehAv-PO Pipeline Verification")
+    print("MAP-PO Pipeline Verification")
     print("=" * 60)
 
     all_passed = True
-    have_data = os.path.exists("data/raw/EXIST2024_training.json")
-    if not have_data:
-        warn("data/raw/EXIST2024_training.json missing",
-             "data checks skipped; request EXIST 2024 from the organizers")
 
-    # 1. Per-language clustering outputs (neutral cluster keys)
-    print("\n1. Per-language clustering outputs")
+    # 1. behavioral_features.csv has cluster column
+    print("\n1. Clustering output")
+    try:
+        import csv
+        with open("data/behavioral_features.csv") as f:
+            rows = list(csv.DictReader(f))
+        has_cluster = bool(rows) and "cluster" in rows[0]
+        all_passed &= check("cluster column exists", has_cluster)
+        if has_cluster:
+            clusters = {r["cluster"] for r in rows}
+            expected = {"Conservative", "Mainstream", "Sensitive"}
+            all_passed &= check(
+                "3 expected clusters",
+                clusters == expected,
+                f"got {clusters}",
+            )
+            all_passed &= check("348 annotators", len(rows) == 348, f"got {len(rows)}")
+    except Exception as e:
+        all_passed &= check("CSV loadable", False, str(e))
+
+    # 1b. Per-language clustering outputs (neutral cluster keys)
+    print("\n1b. Per-language clustering outputs")
     import csv
     expected_rows = {"en": 348, "es": 390}
     for lang, n_expected in expected_rows.items():
         path = f"data/behavioral_features_{lang}.csv"
-        if not os.path.exists(path):
-            warn(path, "not generated yet")
+        exists = os.path.exists(path)
+        all_passed &= check(path, exists)
+        if not exists:
             continue
         try:
             with open(path) as f:
@@ -73,30 +87,73 @@ def main():
         except Exception as e:
             all_passed &= check(f"  {lang}: CSV loadable", False, str(e))
 
-    # 2. Per-language training data
-    print("\n2. Per-language training data")
-    for lang in ["en", "es"]:
-        for cluster in ["cluster1", "cluster2", "cluster3"]:
-            path = f"data/preference/{lang}/sft_{cluster}_train.jsonl"
-            if not os.path.exists(path):
-                warn(path, "not generated yet")
-                continue
+    # 2. SFT JSONL files
+    print("\n2. SFT training data")
+    for cluster in ["conservative", "mainstream", "sensitive"]:
+        path = f"data/preference/sft_{cluster}_train.jsonl"
+        exists = os.path.exists(path)
+        all_passed &= check(f"{path}", exists)
+        if exists:
             with open(path) as f:
                 lines = sum(1 for _ in f)
-            all_passed &= check(f"{path}: >500 examples", lines > 500, f"{lines}")
+            all_passed &= check(f"  {cluster}: >500 examples", lines > 500, f"{lines}")
 
-    # 3. Per-language data splits
-    print("\n3. Per-language data splits")
+    # 3. DPO JSONL files with correct format
+    print("\n3. DPO preference pairs (format check)")
+    for cluster in ["conservative", "mainstream", "sensitive"]:
+        path = f"data/preference/dpo_{cluster}_train.jsonl"
+        exists = os.path.exists(path)
+        all_passed &= check(f"{path}", exists)
+        if exists:
+            with open(path) as f:
+                first = json.loads(f.readline())
+            has_messages_dict = (
+                isinstance(first.get("input"), dict)
+                and "messages" in first["input"]
+            )
+            all_passed &= check(
+                f"  {cluster}: input.messages format",
+                has_messages_dict,
+            )
+
+    # 4. Test/Train split
+    print("\n4. Data splits")
+    for f in ["data/splits/test_set.json", "data/splits/train_set.json"]:
+        all_passed &= check(f"{f}", os.path.exists(f))
+
+    # 4b. Per-language splits
+    print("\n4b. Per-language data splits")
     for lang in ["en", "es"]:
         for name in ["test_set", "train_set", "cluster_meta"]:
             f = f"data/splits/{lang}/{name}.json"
-            if os.path.exists(f):
-                all_passed &= check(f, True)
-            else:
-                warn(f, "not generated yet")
+            all_passed &= check(f"{f}", os.path.exists(f))
 
-    # 4. Evaluation results (shipped; always checked)
-    print("\n4. Evaluation results")
+    # 5. Saved model IDs (all 12 experiments + legacy GRPO iter1)
+    print("\n5. Model IDs")
+    model_files = [
+        "artifacts/model_ids/sft_model_ids.json",
+        "artifacts/model_ids/sft_41mini_model_ids.json",
+        "artifacts/model_ids/sft_pure_41mini_model_ids.json",
+        "artifacts/model_ids/dpo_41mini_model_ids.json",
+        "artifacts/model_ids/dpo_bb03_41mini_model_ids.json",
+        "artifacts/model_ids/dpo_bb05_41mini_model_ids.json",
+        "artifacts/model_ids/marspo_41mini_model_ids.json",
+        "artifacts/model_ids/grpo_iter1_model_ids.json",
+        "artifacts/model_ids/grpo_41mini_alpha00_model_ids.json",
+        "artifacts/model_ids/grpo_41mini_alpha02_model_ids.json",
+        "artifacts/model_ids/grpo_41mini_alpha05_model_ids.json",
+        "artifacts/model_ids/grpo_41mini_alpha10_model_ids.json",
+    ]
+    for f in model_files:
+        exists = os.path.exists(f)
+        all_passed &= check(f"{f}", exists)
+        if exists:
+            with open(f) as fh:
+                ids = json.load(fh)
+            all_passed &= check(f"  {os.path.basename(f)}: 3 IDs", len(ids) == 3, f"got {len(ids)}")
+
+    # 6. Evaluation results (all 12 experiments + baselines + stats)
+    print("\n6. Evaluation results")
     result_files = [
         "artifacts/results/baseline_results.json",
         "artifacts/results/sft_results.json",
@@ -116,7 +173,7 @@ def main():
     ]
     for f in result_files:
         exists = os.path.exists(f)
-        all_passed &= check(f, exists)
+        all_passed &= check(f"{f}", exists)
         if exists:
             try:
                 with open(f) as fh:
@@ -124,8 +181,8 @@ def main():
             except Exception as e:
                 all_passed &= check(f"  {os.path.basename(f)}: well-formed JSON", False, str(e))
 
-    # 4b. Every fine-tuned result reports the core metrics
-    print("\n4b. Result metric coverage")
+    # 6b. Every non-baseline result reports the core metrics the paper cites
+    print("\n6b. Result metric coverage")
     required_keys = ["mva", "f1_macro", "disagreement_rate"]
     fine_tuned = [
         "artifacts/results/sft_41mini_results.json",
@@ -151,8 +208,19 @@ def main():
             f"missing {missing}" if missing else "",
         )
 
-    # 4c. Bilingual / local experiment results
-    print("\n4c. Bilingual + local results")
+    # 6c. Paper figures
+    print("\n6c. Paper figures")
+    for fig in ["team_f1", "cluster_f1", "cluster_vs_team",
+                "balance_scatter", "cluster_f1_breakdown",
+                "cluster_coverage", "yes_rates", "agreement",
+                "alpha_sweep", "beta_sweep",
+                "crosslingual_team_f1", "behavioral_fidelity",
+                "subset_comparison"]:
+        p = f"paper/figures/{fig}.pdf"
+        all_passed &= check(p, os.path.exists(p))
+
+    # 6d. Bilingual / local experiment results
+    print("\n6d. Bilingual + local results")
     local_gpt_results = []
     for lang in ["en", "es"]:
         for stage in ["base", "sft", "dpo", "grpo_a20"]:
@@ -160,6 +228,10 @@ def main():
     local_gpt_results.append("artifacts/results/local_qwen3_sft_balanced_en_results.json")
     for stage in ["sft", "dpo", "grpo_a20"]:
         local_gpt_results.append(f"artifacts/results/gpt41mini_{stage}_es_results.json")
+    # Same-base baselines on gpt-4.1-mini (paper tables)
+    local_gpt_results.append("artifacts/results/base_41mini_results.json")
+    local_gpt_results.append("artifacts/results/persona_41mini_results.json")
+    local_gpt_results.append("artifacts/results/gpt41mini_base_es_results.json")
     analysis_results = [
         "artifacts/results/behavioral_fidelity_en.json",
         "artifacts/results/behavioral_fidelity_es.json",
@@ -169,7 +241,7 @@ def main():
     required_metrics = ["mva", "f1_macro", "balanced_accuracy", "disagreement_rate"]
     for f in local_gpt_results:
         exists = os.path.exists(f)
-        all_passed &= check(f, exists)
+        all_passed &= check(f"{f}", exists)
         if not exists:
             continue
         try:
@@ -186,7 +258,7 @@ def main():
         )
     for f in analysis_results:
         exists = os.path.exists(f)
-        all_passed &= check(f, exists)
+        all_passed &= check(f"{f}", exists)
         if exists:
             try:
                 with open(f) as fh:
@@ -194,8 +266,8 @@ def main():
             except Exception as e:
                 all_passed &= check(f"  {os.path.basename(f)}: well-formed JSON", False, str(e))
 
-    # 5. Synthetic-data gate
-    print("\n5. Synthetic-data gate")
+    # 6e. Synthetic-data gate
+    print("\n6e. Synthetic-data gate")
     tainted = []
     for name in sorted(os.listdir("artifacts/results")):
         path = os.path.join("artifacts/results", name)
@@ -213,32 +285,101 @@ def main():
         not tainted,
         f"tainted: {tainted}" if tainted else "",
     )
+    try:
+        with open("paper/main.tex") as fh:
+            tex = fh.read()
+        all_passed &= check("paper/main.tex has no [P] placeholders", "[P]" not in tex)
+        all_passed &= check(
+            "paper/main.tex does not enable \\synthetictrue",
+            "\\synthetictrue" not in tex,
+        )
+    except Exception as e:
+        all_passed &= check("paper/main.tex readable", False, str(e))
 
-    # 6. Python modules
-    print("\n6. Python modules")
+    # 7. LaTeX paper
+    print("\n7. Paper")
+    paper_pdf = os.path.exists("paper/main.pdf")
+    all_passed &= check("paper/main.pdf exists", paper_pdf)
+    paper_tex = os.path.exists("paper/main.tex")
+    all_passed &= check("paper/main.tex exists", paper_tex)
+
+    # 8. Sensitive files excluded from git
+    print("\n8. Git safety")
+    result = subprocess.run(
+        ["git", "ls-files", "--cached", "CLAUDE.md", ".gitignore"],
+        capture_output=True, text=True,
+    )
+    tracked = result.stdout.strip()
+    all_passed &= check(
+        "CLAUDE.md not tracked",
+        "CLAUDE.md" not in tracked,
+        tracked if tracked else "",
+    )
+    all_passed &= check(
+        ".gitignore not tracked",
+        ".gitignore" not in tracked,
+    )
+
+    # 9. No API keys in git history
+    print("\n9. API key safety")
+    try:
+        result = subprocess.run(
+            ["git", "log", "--all", "--format=%s%n%b"],
+            capture_output=True, text=True, timeout=30,
+        )
+        no_keys = "sk-proj" not in result.stdout and "sk-" not in result.stdout[:5000]
+        all_passed &= check("no API keys in commit messages", no_keys)
+    except Exception as e:
+        warn("API key check skipped", str(e))
+
+    # 10. No Claude references in commits
+    print("\n10. No AI tool references in commits")
+    try:
+        result = subprocess.run(
+            ["git", "log", "--oneline", "--all"],
+            capture_output=True, text=True,
+        )
+        commits = result.stdout.lower()
+        all_passed &= check("no 'claude' in commit messages", "claude" not in commits)
+    except Exception as e:
+        warn("Commit message check skipped", str(e))
+
+    # 11. Git identity
+    print("\n11. Git identity (last commit)")
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%an <%ae>"],
+            capture_output=True, text=True,
+        )
+        author = result.stdout.strip()
+        all_passed &= check(
+            "author = mohammadi-hadi",
+            "mohammadi-hadi" in author,
+            author,
+        )
+    except Exception as e:
+        warn("Author check skipped", str(e))
+
+    # 12. Required Python imports
+    print("\n12. Python modules")
     try:
         import config  # noqa
         all_passed &= check("config.py imports", True)
-    except Exception as e:
-        all_passed &= check("config.py imports", False, str(e))
-    try:
-        from models.agent import Agent  # noqa
+        from models.agent import Agent, MultiAgentSystem  # noqa
         all_passed &= check("models.agent imports", True)
         from evaluation.metrics import compute_all_metrics  # noqa
         all_passed &= check("evaluation.metrics imports", True)
-    except ModuleNotFoundError as e:
-        warn("module imports", f"{e}; run: pip install -r requirements.txt")
     except Exception as e:
         all_passed &= check("module imports", False, str(e))
 
     # Summary
     print("\n" + "=" * 60)
     if all_passed:
-        print(f"{OK} ALL CHECKS PASSED")
+        print(f"{OK} ALL CHECKS PASSED — ready to commit and push")
         print("=" * 60)
         sys.exit(0)
     else:
-        print(f"{FAIL} ONE OR MORE CHECKS FAILED")
+        print(f"{FAIL} ONE OR MORE CHECKS FAILED — fix before committing")
         print("=" * 60)
         sys.exit(1)
 

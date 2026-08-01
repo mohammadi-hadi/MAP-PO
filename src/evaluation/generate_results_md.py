@@ -168,7 +168,7 @@ def head_commit():
 def main():
     L = []
     add = L.append
-    add("# BehAv-PO — Complete Experimental Results")
+    add("# MAP-PO — Complete Experimental Results")
     add("")
     add(f"*Generated from `artifacts/` by `src/evaluation/generate_results_md.py` "
         f"on {date.today()} (commit `{head_commit()}`). Do not edit by hand — "

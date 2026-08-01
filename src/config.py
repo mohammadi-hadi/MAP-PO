@@ -1,5 +1,5 @@
 """
-BehAv-PO Configuration
+MAP-PO Configuration
 ======================
 Shared hyperparameters, paths, and model settings for the
 multi-agent behavioral preference optimization pipeline.

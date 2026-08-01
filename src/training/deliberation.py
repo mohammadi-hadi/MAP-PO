@@ -208,7 +208,7 @@ def build_deliberation_preference_pairs(trajectories, output_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Multi-round deliberation for BehAv-PO")
+    parser = argparse.ArgumentParser(description="Multi-round deliberation for MAP-PO")
     parser.add_argument("--generate", action="store_true", help="Generate deliberation data")
     parser.add_argument("--finetune", action="store_true", help="Fine-tune on deliberation data")
     parser.add_argument("--evaluate", action="store_true", help="Evaluate deliberation")

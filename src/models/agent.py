@@ -2,7 +2,7 @@
 """
 Agent Wrapper
 =============
-Wraps OpenAI API calls for the 3 BehAv-PO agents (Conservative, Mainstream, Sensitive).
+Wraps OpenAI API calls for the 3 MAP-PO agents (Conservative, Mainstream, Sensitive).
 Handles batch inference, YES/NO parsing, and model management.
 """
 
@@ -18,7 +18,7 @@ import config
 
 
 class Agent:
-    """A single BehAv-PO agent backed by a fine-tuned GPT-4o-mini model."""
+    """A single MAP-PO agent backed by a fine-tuned GPT-4o-mini model."""
 
     def __init__(self, cluster_name, model_id=None):
         """

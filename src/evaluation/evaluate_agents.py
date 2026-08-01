@@ -2,7 +2,7 @@
 """
 Evaluation Pipeline
 ====================
-Evaluates the BehAv-PO multi-agent system on the test set.
+Evaluates the MAP-PO multi-agent system on the test set.
 Supports evaluation of: base model, SFT models, DPO models, GRPO models.
 Includes baseline comparisons.
 
@@ -202,7 +202,7 @@ def evaluate_baseline_persona_prompt(test_data):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate BehAv-PO agents")
+    parser = argparse.ArgumentParser(description="Evaluate MAP-PO agents")
     parser.add_argument("--model", choices=["base", "sft", "dpo", "grpo"],
                         help="Model phase to evaluate")
     parser.add_argument("--baselines", action="store_true", help="Run all baselines")

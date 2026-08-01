@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Local MLX agent for the bilingual BehAv-PO experiments (Qwen3-8B).
+Local MLX agent for the bilingual MAP-PO experiments (Qwen3-8B).
 
 Every completion in this task is a single YES/NO answer, so inference never
 generates autoregressively: one prefill pass gives the next-token logits, and

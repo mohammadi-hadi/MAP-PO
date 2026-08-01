@@ -4,7 +4,7 @@ Preference Data Preparation Pipeline (language-parameterized)
 =============================================================
 Reads EXIST2024_training.json + data/behavioral_features_{lang}.csv (with
 neutral cluster keys "cluster1".."clusterK"), and produces training data
-for the per-cluster BehAv-PO agents.
+for the per-cluster MAP-PO agents.
 
 Outputs (per language):
   data/splits/{lang}/split_info.json     Train/val/test group assignments
@@ -390,7 +390,7 @@ def run_en_split_guard(splits_dir):
 
 def main(lang, balance_labels=False):
     print("=" * 60)
-    print(f"BehAv-PO Data Preparation Pipeline [{lang}]")
+    print(f"MAP-PO Data Preparation Pipeline [{lang}]")
     print("=" * 60)
 
     splits_dir = config.SPLITS_DIR / lang

@@ -2,7 +2,7 @@
 """
 Evaluation Metrics
 ==================
-Metrics for the BehAv-PO multi-agent system:
+Metrics for the MAP-PO multi-agent system:
   - CAA  (Cluster-Alignment Accuracy): agent matches its cluster's vote
   - MVA  (Majority Vote Accuracy): team vote matches overall majority
   - YES-Rate Calibration: |agent_yes_rate - cluster_yes_rate|

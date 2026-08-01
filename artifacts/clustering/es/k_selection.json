@@ -1,0 +1,236 @@
+{
+  "language": "es",
+  "n_annotators": 390,
+  "features": [
+    "yes_rate",
+    "agreement_rate",
+    "label_entropy"
+  ],
+  "scan": [
+    {
+      "k": 2,
+      "silhouette": 0.4647,
+      "min_cluster_share": 0.1949,
+      "yes_rate_mad": 0.0994,
+      "min_pairwise_yes_gap": 0.1878,
+      "clusters": [
+        {
+          "cluster": "cluster1",
+          "size": 76,
+          "share": 0.1949,
+          "mean_yes_rate": 0.3325,
+          "yes_rate_min": 0.0702,
+          "yes_rate_max": 0.8947,
+          "yes_rate_span": 0.8246
+        },
+        {
+          "cluster": "cluster2",
+          "size": 314,
+          "share": 0.8051,
+          "mean_yes_rate": 0.5203,
+          "yes_rate_min": 0.2807,
+          "yes_rate_max": 0.7895,
+          "yes_rate_span": 0.5088
+        }
+      ]
+    },
+    {
+      "k": 3,
+      "silhouette": 0.3489,
+      "min_cluster_share": 0.1718,
+      "yes_rate_mad": 0.0591,
+      "min_pairwise_yes_gap": 0.204,
+      "clusters": [
+        {
+          "cluster": "cluster1",
+          "size": 67,
+          "share": 0.1718,
+          "mean_yes_rate": 0.2677,
+          "yes_rate_min": 0.0702,
+          "yes_rate_max": 0.4211,
+          "yes_rate_span": 0.3509
+        },
+        {
+          "cluster": "cluster2",
+          "size": 234,
+          "share": 0.6,
+          "mean_yes_rate": 0.4723,
+          "yes_rate_min": 0.2982,
+          "yes_rate_max": 0.6316,
+          "yes_rate_span": 0.3333
+        },
+        {
+          "cluster": "cluster3",
+          "size": 89,
+          "share": 0.2282,
+          "mean_yes_rate": 0.6763,
+          "yes_rate_min": 0.5614,
+          "yes_rate_max": 0.8947,
+          "yes_rate_span": 0.3333
+        }
+      ]
+    },
+    {
+      "k": 4,
+      "silhouette": 0.3554,
+      "min_cluster_share": 0.141,
+      "yes_rate_mad": 0.0665,
+      "min_pairwise_yes_gap": 0.0241,
+      "clusters": [
+        {
+          "cluster": "cluster1",
+          "size": 55,
+          "share": 0.141,
+          "mean_yes_rate": 0.2502,
+          "yes_rate_min": 0.0702,
+          "yes_rate_max": 0.3158,
+          "yes_rate_span": 0.2456
+        },
+        {
+          "cluster": "cluster2",
+          "size": 68,
+          "share": 0.1744,
+          "mean_yes_rate": 0.4625,
+          "yes_rate_min": 0.2982,
+          "yes_rate_max": 0.7895,
+          "yes_rate_span": 0.4912
+        },
+        {
+          "cluster": "cluster3",
+          "size": 202,
+          "share": 0.5179,
+          "mean_yes_rate": 0.4866,
+          "yes_rate_min": 0.3158,
+          "yes_rate_max": 0.6316,
+          "yes_rate_span": 0.3158
+        },
+        {
+          "cluster": "cluster4",
+          "size": 65,
+          "share": 0.1667,
+          "mean_yes_rate": 0.6945,
+          "yes_rate_min": 0.614,
+          "yes_rate_max": 0.8947,
+          "yes_rate_span": 0.2807
+        }
+      ]
+    },
+    {
+      "k": 5,
+      "silhouette": 0.3587,
+      "min_cluster_share": 0.0256,
+      "yes_rate_mad": 0.0642,
+      "min_pairwise_yes_gap": 0.0182,
+      "clusters": [
+        {
+          "cluster": "cluster1",
+          "size": 52,
+          "share": 0.1333,
+          "mean_yes_rate": 0.2646,
+          "yes_rate_min": 0.1579,
+          "yes_rate_max": 0.3333,
+          "yes_rate_span": 0.1754
+        },
+        {
+          "cluster": "cluster2",
+          "size": 66,
+          "share": 0.1692,
+          "mean_yes_rate": 0.4494,
+          "yes_rate_min": 0.2632,
+          "yes_rate_max": 0.7193,
+          "yes_rate_span": 0.4561
+        },
+        {
+          "cluster": "cluster3",
+          "size": 179,
+          "share": 0.459,
+          "mean_yes_rate": 0.4748,
+          "yes_rate_min": 0.3333,
+          "yes_rate_max": 0.614,
+          "yes_rate_span": 0.2807
+        },
+        {
+          "cluster": "cluster4",
+          "size": 10,
+          "share": 0.0256,
+          "mean_yes_rate": 0.493,
+          "yes_rate_min": 0.0702,
+          "yes_rate_max": 0.8947,
+          "yes_rate_span": 0.8246
+        },
+        {
+          "cluster": "cluster5",
+          "size": 83,
+          "share": 0.2128,
+          "mean_yes_rate": 0.6665,
+          "yes_rate_min": 0.5965,
+          "yes_rate_max": 0.7895,
+          "yes_rate_span": 0.193
+        }
+      ]
+    },
+    {
+      "k": 6,
+      "silhouette": 0.3598,
+      "min_cluster_share": 0.0205,
+      "yes_rate_mad": 0.0532,
+      "min_pairwise_yes_gap": 0.0217,
+      "clusters": [
+        {
+          "cluster": "cluster1",
+          "size": 8,
+          "share": 0.0205,
+          "mean_yes_rate": 0.1842,
+          "yes_rate_min": 0.0702,
+          "yes_rate_max": 0.3158,
+          "yes_rate_span": 0.2456
+        },
+        {
+          "cluster": "cluster2",
+          "size": 52,
+          "share": 0.1333,
+          "mean_yes_rate": 0.2676,
+          "yes_rate_min": 0.1579,
+          "yes_rate_max": 0.3333,
+          "yes_rate_span": 0.1754
+        },
+        {
+          "cluster": "cluster3",
+          "size": 72,
+          "share": 0.1846,
+          "mean_yes_rate": 0.4516,
+          "yes_rate_min": 0.2982,
+          "yes_rate_max": 0.6667,
+          "yes_rate_span": 0.3684
+        },
+        {
+          "cluster": "cluster4",
+          "size": 165,
+          "share": 0.4231,
+          "mean_yes_rate": 0.4733,
+          "yes_rate_min": 0.3333,
+          "yes_rate_max": 0.5965,
+          "yes_rate_span": 0.2632
+        },
+        {
+          "cluster": "cluster5",
+          "size": 82,
+          "share": 0.2103,
+          "mean_yes_rate": 0.657,
+          "yes_rate_min": 0.5965,
+          "yes_rate_max": 0.7719,
+          "yes_rate_span": 0.1754
+        },
+        {
+          "cluster": "cluster6",
+          "size": 11,
+          "share": 0.0282,
+          "mean_yes_rate": 0.7974,
+          "yes_rate_min": 0.7193,
+          "yes_rate_max": 0.8947,
+          "yes_rate_span": 0.1754
+        }
+      ]
+    }
+  ]
+}

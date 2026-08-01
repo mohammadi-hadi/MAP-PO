@@ -1,11 +1,11 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "BehAv-PO: Behavioral Cluster-Driven Multi-Agent Preference Optimization for Sexism Detection"
+title: "MAP-PO: Learning Sexism Detection Using Multi-Agent Perspectivist Preference Optimization"
 type: software
 authors:
   - family-names: Mohammadi
     given-names: Hadi
     orcid: "https://orcid.org/0000-0003-0860-9200"
-repository-code: "https://github.com/mohammadi-hadi/BehAv-PO"
+repository-code: "https://github.com/mohammadi-hadi/MAP-PO"
 license: MIT
 abstract: "Annotator-behavior clustering plus three LLM agents fine-tuned with SFT, DPO, and GRPO that vote on sexism labels (EXIST 2024). The accompanying paper is under review; this entry will be updated on publication."

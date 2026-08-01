@@ -155,7 +155,7 @@ def check_status(client):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="DPO fine-tuning for BehAv-PO agents")
+    parser = argparse.ArgumentParser(description="DPO fine-tuning for MAP-PO agents")
     parser.add_argument("cluster", nargs="?", help="Cluster to fine-tune (or 'all')")
     parser.add_argument("--status", action="store_true", help="Check job statuses")
     parser.add_argument("--wait", action="store_true", help="Wait for jobs to complete")

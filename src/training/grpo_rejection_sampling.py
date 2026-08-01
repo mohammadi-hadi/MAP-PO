@@ -274,7 +274,7 @@ def check_status(client, iteration=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="GRPO rejection sampling for BehAv-PO")
+    parser = argparse.ArgumentParser(description="GRPO rejection sampling for MAP-PO")
     parser.add_argument("--iteration", type=int, help="Run specific iteration")
     parser.add_argument("--status", action="store_true", help="Check job statuses")
     parser.add_argument("--sample-size", type=int, default=500,
