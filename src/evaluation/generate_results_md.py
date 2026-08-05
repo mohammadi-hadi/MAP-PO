@@ -13,6 +13,7 @@ Columns that require per-text predictions (GPT-EN Cluster F1, Always-NO
 team F1) show "--" when artifacts/predictions/ is absent.
 """
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -154,10 +155,12 @@ def table(header, rows):
 
 
 def avg_cluster_f1(res, key, lang):
+    # math.fsum keeps the mean identical across Python versions (sum() changed
+    # its float algorithm in 3.12), so the generated document is byte-stable.
     if res and res.get("f1_macro_cluster1") is not None:
-        return sum(res[f"f1_macro_{c}"] for c in CL) / 3
+        return math.fsum(res[f"f1_macro_{c}"] for c in CL) / 3
     m = core_from_preds(key, lang)
-    return sum(m[f"f1_macro_{c}"] for c in CL) / 3 if m else None
+    return math.fsum(m[f"f1_macro_{c}"] for c in CL) / 3 if m else None
 
 
 def mean_calib(res, lang):
@@ -167,7 +170,7 @@ def mean_calib(res, lang):
     vals = [res.get(f"yes_rate_{c}") for c in CL]
     if any(v is None for v in vals):
         return None
-    return sum(abs(v - tgt[c]) for v, c in zip(vals, CL)) / 3
+    return math.fsum(abs(v - tgt[c]) for v, c in zip(vals, CL)) / 3
 
 
 def main():
