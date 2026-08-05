@@ -1,7 +1,7 @@
 # MAP-PO
 
 [![CI](https://github.com/mohammadi-hadi/MAP-PO/actions/workflows/ci.yml/badge.svg)](https://github.com/mohammadi-hadi/MAP-PO/actions/workflows/ci.yml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21803549.svg)](https://doi.org/10.5281/zenodo.21803549)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21803548.svg)](https://doi.org/10.5281/zenodo.21803548)
 
 Annotators disagree about sexism because they see it differently. MAP-PO keeps those
 perspectives instead of averaging them away: it clusters annotators by labeling behavior,
