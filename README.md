@@ -1,6 +1,7 @@
 # MAP-PO
 
 [![CI](https://github.com/mohammadi-hadi/MAP-PO/actions/workflows/ci.yml/badge.svg)](https://github.com/mohammadi-hadi/MAP-PO/actions/workflows/ci.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21803549.svg)](https://doi.org/10.5281/zenodo.21803549)
 
 Annotators disagree about sexism because they see it differently. MAP-PO keeps those
 perspectives instead of averaging them away: it clusters annotators by labeling behavior,
@@ -205,7 +206,7 @@ without the raw data.
 
 The accompanying paper is under double-blind review, so citation metadata is withheld until
 it appears (`CITATION_RESTORE.md` documents the restore). Until then, please cite the
-repository by URL and release tag.
+Zenodo archive: [10.5281/zenodo.21803549](https://doi.org/10.5281/zenodo.21803549).
 
 ## License
 
