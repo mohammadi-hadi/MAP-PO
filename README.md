@@ -82,6 +82,13 @@ agreement).
   calibration error 1.7 → 10.9 pp; imbalance is handled at the metric level (F1-macro,
   balanced accuracy) instead.
 
+![Per-cluster agent YES rates after SFT, DPO and GRPO against the annotator targets](figures/polarization.png)
+
+*The polarization result in one picture: in every setting, individual-only DPO (red) pins the
+outer agents to 0% / 100% YES, while SFT (gray) and GRPO's team reward (navy) keep every agent
+near its cluster's annotator target (dashed). Regenerate from the committed artifacts with
+`python3 figures/plot_polarization.py`.*
+
 ## Quick start
 
 Local pipeline (no API key, Apple Silicon):
@@ -162,6 +169,7 @@ MAP-PO/
 │   └── clustering/{en,es}/      Clustering summaries, k-means scans, k-selection
 │
 ├── tests/                       Metric checks vs scikit-learn + artifact guards
+├── figures/                     The polarization figure + the script that regenerates it
 ├── data/                        Regenerated locally from the EXIST source (not distributed)
 ├── PIPELINE.md                  Step-by-step pipeline guide
 ├── RESULTS.md                   Every experiment in one generated document
