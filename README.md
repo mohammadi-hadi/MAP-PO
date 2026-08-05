@@ -1,41 +1,37 @@
-<div align="center">
-
 # MAP-PO
 
-### Learning Sexism Detection Using Multi-Agent Perspectivist Preference Optimization
+[![CI](https://github.com/mohammadi-hadi/MAP-PO/actions/workflows/ci.yml/badge.svg)](https://github.com/mohammadi-hadi/MAP-PO/actions/workflows/ci.yml)
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Dataset: EXIST 2024](https://img.shields.io/badge/Dataset-EXIST%202024-8A2BE2.svg)](http://nlp.uned.es/exist2024/)
-[![Backbones: gpt-4.1-mini · Qwen3-8B](https://img.shields.io/badge/Backbones-gpt--4.1--mini%20%C2%B7%20Qwen3--8B-0A7E8C.svg)](#backbones)
-[![Languages: EN · ES](https://img.shields.io/badge/Languages-EN%20%C2%B7%20ES-success.svg)](#results)
-[![Paper: under review](https://img.shields.io/badge/Paper-under%20review-lightgrey.svg)](#citation)
-
-*Annotators disagree about sexism because they see it differently. MAP-PO keeps those
+Annotators disagree about sexism because they see it differently. MAP-PO keeps those
 perspectives instead of averaging them away: it clusters annotators by labeling behavior,
-trains one LLM agent per cluster with SFT / DPO / GRPO, and lets the agents vote.*
-
-</div>
-
----
-
-## Overview
+trains one LLM agent per cluster with SFT / DPO / GRPO, and lets the agents vote.
 
 Most sexism-detection systems collapse six annotator labels into one gold label and train on
 that, discarding the disagreement. MAP-PO (Multi-Agent Perspectivist Preference Optimization)
-treats the disagreement as the signal.
+treats the disagreement as the signal. Annotators are clustered by **labeling behavior** —
+YES rate, agreement rate, and label entropy — into three groups per language. One LLM agent
+is fine-tuned per cluster with supervised fine-tuning, then with a preference-optimization
+objective (DPO, Mars-PO, or GRPO with a convex individual/team reward). The three agents
+vote, and their disagreement doubles as an uncertainty signal.
 
-Annotators are clustered by **labeling behavior** — YES rate, agreement rate, and label
-entropy — into three groups per language. One LLM agent is fine-tuned per cluster with
-supervised fine-tuning, then with a preference-optimization objective (DPO, Mars-PO, or GRPO
-with a convex individual/team reward). The three agents vote, and their disagreement doubles
-as an uncertainty signal.
+```mermaid
+flowchart LR
+    A["EXIST 2024<br/>6 annotators per tweet"] --> B["behavioral clustering<br/>YES rate · agreement · entropy"]
+    B --> C["3 per-cluster datasets<br/>(EN and ES)"]
+    C --> D1["agent 1: SFT → PO"]
+    C --> D2["agent 2: SFT → PO"]
+    C --> D3["agent 3: SFT → PO"]
+    D1 --> E["team vote"]
+    D2 --> E
+    D3 --> E
+    E --> F["label + disagreement<br/>as uncertainty"]
+```
 
 Clusters use neutral names `cluster1`/`cluster2`/`cluster3`, ordered by ascending YES rate
 (display names come from `src/config.py:CLUSTER_DISPLAY`; legacy names in old artifacts are
 normalized at load time).
 
-## Key Features
+## What it demonstrates
 
 - **Behavioral annotator clustering** — k-means over YES rate, agreement rate, and label
   entropy; demographics are shown *not* to predict cluster membership
@@ -48,7 +44,6 @@ normalized at load time).
 - **Restart-safe pipelines** — the local runner keeps state in `artifacts/local_state.json`;
   the OpenAI suite resumes from `artifacts/openai_es_state.json`
 
-<a name="results"></a>
 ## Results
 
 Team F1-macro on the full test sets, across two backbones and two languages:
@@ -87,8 +82,7 @@ agreement).
   calibration error 1.7 → 10.9 pp; imbalance is handled at the metric level (F1-macro,
   balanced accuracy) instead.
 
-<a name="backbones"></a>
-## Quick Start
+## Quick start
 
 Local pipeline (no API key, Apple Silicon):
 
@@ -117,17 +111,28 @@ python3 src/training/openai_es_suite.py --status
 The English OpenAI experiments (SFT / DPO / Mars-PO / GRPO sweeps) are documented step by step
 in `PIPELINE.md`.
 
-Verification:
+## Verification
+
+The repository checks itself:
 
 ```bash
-python3 src/pipeline/verify_pipeline.py
+pip install -r requirements.txt pytest
+pytest                                            # metrics vs scikit-learn + artifact guards
+python3 src/evaluation/generate_results_md.py     # regenerate RESULTS.md from artifacts/
 ```
 
-Checks the shipped result JSONs (format and metric coverage for all four settings) and, once
-`data/` has been regenerated, the clustering outputs, data shapes, and splits. Data checks are
-skipped with a warning on a fresh clone.
+- The homegrown metrics are tested against scikit-learn on random labelings.
+- The committed prediction files are tested to contain text IDs, votes and probabilities
+  only — the EXIST data may not be redistributed, and CI enforces that forever.
+- `RESULTS.md` is generated from `artifacts/`; CI regenerates it on every push and fails
+  if the committed document and the committed artifacts ever disagree.
 
-## Why Three Clusters?
+`python3 src/pipeline/verify_pipeline.py` additionally checks the shipped result JSONs
+(format and metric coverage for all four settings) and, once `data/` has been regenerated,
+the clustering outputs, data shapes, and splits. Data checks are skipped with a warning on
+a fresh clone.
+
+## Why three clusters?
 
 Silhouette prefers k=2 on Spanish, but that solution puts annotators spanning 7% to 89% YES in
 one cluster, merging the leanings the agents are meant to separate. At k=3 the mean deviation
@@ -139,7 +144,7 @@ apart. Reproduce the diagnostics with:
 python3 src/preprocessing/k_selection.py            # both languages
 ```
 
-## Repository Structure
+## Repository structure
 
 ```
 MAP-PO/
@@ -156,6 +161,7 @@ MAP-PO/
 │   ├── predictions/             Per-text agent votes (text IDs and labels only)
 │   └── clustering/{en,es}/      Clustering summaries, k-means scans, k-selection
 │
+├── tests/                       Metric checks vs scikit-learn + artifact guards
 ├── data/                        Regenerated locally from the EXIST source (not distributed)
 ├── PIPELINE.md                  Step-by-step pipeline guide
 ├── RESULTS.md                   Every experiment in one generated document
@@ -178,7 +184,7 @@ file by the pipeline. The evaluation results in `artifacts/results/` and the clu
 summaries in `artifacts/clustering/` are included, so the results tables are reproducible
 without the raw data.
 
-## Related Work
+## Related work
 
 - [Exist-2023](https://github.com/mohammadi-hadi/Exist-2023) — BERT / XLM-RoBERTa / DistilBERT
   voting ensemble for the EXIST 2023 shared task (CLEF 2023)
@@ -187,12 +193,11 @@ without the raw data.
 - [Explainable-Sexism-Detection](https://github.com/mohammadi-hadi/Explainable-Sexism-Detection)
   — transparent sexism-detection pipeline with SHAP explanations (Applied Sciences, 2024)
 
-<a name="citation"></a>
 ## Citation
 
-The accompanying paper is under review. Until it appears, cite the software entry in
-[CITATION.cff](CITATION.cff) (GitHub's "Cite this repository" button renders it in APA and
-BibTeX).
+The accompanying paper is under double-blind review, so citation metadata is withheld until
+it appears (`CITATION_RESTORE.md` documents the restore). Until then, please cite the
+repository by URL and release tag.
 
 ## License
 
