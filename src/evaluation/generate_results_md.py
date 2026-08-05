@@ -13,9 +13,7 @@ Columns that require per-text predictions (GPT-EN Cluster F1, Always-NO
 team F1) show "--" when artifacts/predictions/ is absent.
 """
 import json
-import subprocess
 import sys
-from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -84,8 +82,24 @@ def annotator_mean_targets(lang):
     return {c: s["features"][c]["yes_rate"]["mean"] for c in CL}
 
 
+_BACKFILL = {}
+
+
+def backfill(lang):
+    """Aggregate metrics exported by export_core_backfill.py from a checkout
+    that has data/splits, so this document regenerates in full from the
+    committed artifacts alone."""
+    if lang not in _BACKFILL:
+        p = RES / f"{lang}_core_backfill.json"
+        _BACKFILL[lang] = json.loads(p.read_text()) if p.exists() else {}
+    return _BACKFILL[lang]
+
+
 def core_from_preds(key, lang):
     """Recompute metrics from per-text predictions (GPT-EN backfill path)."""
+    entry = backfill(lang).get(key)
+    if entry:
+        return entry["core"]
     preds, recs = load_predictions(key), test_set(lang)
     if preds is None or recs is None:
         return None
@@ -156,24 +170,15 @@ def mean_calib(res, lang):
     return sum(abs(v - tgt[c]) for v, c in zip(vals, CL)) / 3
 
 
-def head_commit():
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=R,
-            text=True, stderr=subprocess.DEVNULL).strip()
-    except Exception:
-        return "unknown"
-
-
 def main():
     L = []
     add = L.append
     add("# MAP-PO — Complete Experimental Results")
     add("")
-    add(f"*Generated from `artifacts/` by `src/evaluation/generate_results_md.py` "
-        f"on {date.today()} (commit `{head_commit()}`). Do not edit by hand — "
-        f"regenerate instead. All scores are ×100; F1 is macro (mean of F1-YES "
-        f"and F1-NO) unless stated otherwise.*")
+    add("*Generated from `artifacts/` by `src/evaluation/generate_results_md.py`. "
+        "Do not edit by hand — regenerate instead; CI checks that this file "
+        "matches its inputs. All scores are ×100; F1 is macro (mean of F1-YES "
+        "and F1-NO) unless stated otherwise.*")
     add("")
     add("Four settings cross two backbones with two languages: **GPT-EN / GPT-ES** "
         "fine-tune `gpt-4.1-mini` through the OpenAI API; **Qwen-EN / Qwen-ES** "
@@ -326,6 +331,8 @@ def main():
             if res is None:
                 continue
             sub = res.get("all_clusters_subset")
+            if sub is None:
+                sub = backfill(lang).get(key, {}).get("all_clusters_subset")
             if sub is None:
                 preds, recs = load_predictions(key), test_set(lang)
                 if preds and recs:

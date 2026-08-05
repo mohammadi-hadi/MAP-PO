@@ -1,6 +1,6 @@
 # MAP-PO — Complete Experimental Results
 
-*Generated from `artifacts/` by `src/evaluation/generate_results_md.py` on 2026-07-19 (commit `21d55d8`). Do not edit by hand — regenerate instead. All scores are ×100; F1 is macro (mean of F1-YES and F1-NO) unless stated otherwise.*
+*Generated from `artifacts/` by `src/evaluation/generate_results_md.py`. Do not edit by hand — regenerate instead; CI checks that this file matches its inputs. All scores are ×100; F1 is macro (mean of F1-YES and F1-NO) unless stated otherwise.*
 
 Four settings cross two backbones with two languages: **GPT-EN / GPT-ES** fine-tune `gpt-4.1-mini` through the OpenAI API; **Qwen-EN / Qwen-ES** train Qwen3-8B locally with MLX LoRA. Three agents (one per behavioral annotator cluster) vote on the final label.
 
