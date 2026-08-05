@@ -332,7 +332,7 @@ Writes `paper/map_po_overleaf.zip` containing `main.tex`, `references.bib`,
 
 ## Step 10: Pre-Commit Verification
 
-**Required before every commit** (enforced by CLAUDE.md):
+**Required before every commit:**
 
 ```bash
 python src/pipeline/verify_pipeline.py
