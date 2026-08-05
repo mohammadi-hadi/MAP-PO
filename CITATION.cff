@@ -8,7 +8,7 @@ authors:
     orcid: "https://orcid.org/0000-0003-0860-9200"
 repository-code: "https://github.com/mohammadi-hadi/MAP-PO"
 license: MIT
-doi: 10.5281/zenodo.21803548
+doi: 10.5281/zenodo.21805589
 version: 1.1.1
 date-released: "2026-08-05"
 abstract: "Annotator-behavior clustering plus three LLM agents fine-tuned with SFT, DPO, and GRPO that vote on sexism labels (EXIST 2024). Annotators are clustered by labeling behavior, one agent is trained per cluster, and agent disagreement doubles as an uncertainty signal."
