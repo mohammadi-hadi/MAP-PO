@@ -211,9 +211,9 @@ without the raw data.
 
 ## Citation
 
-The accompanying paper is under double-blind review, so citation metadata is withheld until
-it appears (`CITATION_RESTORE.md` documents the restore). Until then, please cite the
-Zenodo archive: [10.5281/zenodo.21803549](https://doi.org/10.5281/zenodo.21803549).
+The accompanying paper is available as a preprint:
+[arXiv:2608.04056](https://arxiv.org/abs/2608.04056). Please cite it for the method, and the
+Zenodo archive for the code: [10.5281/zenodo.21803549](https://doi.org/10.5281/zenodo.21803549).
 
 ## License
 
